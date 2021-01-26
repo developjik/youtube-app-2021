@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 
 import NavBar from "./components/views/NavBar/NavBar";
@@ -10,14 +11,32 @@ import Auth from "./hoc/auth";
 
 import "./App.css";
 
+import { Spin } from "antd";
+
 function App() {
   return (
     <Router>
-      <Switch>
-        <Route exact path="/" component={Auth(LandingPage,null)} />
-        <Route exact path="/register" component={Auth(RegisterPage,false)} />
-        <Route exact path="/login" component={Auth(LoginPage,false)} />
-      </Switch>
+      <Suspense
+        fallback={
+          <Spin
+            tip="Loading..."
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: "100vh",
+            }}
+          ></Spin>
+        }
+      >
+        <NavBar />
+        <Switch>
+          <Route exact path="/" component={Auth(LandingPage, null)} />
+          <Route exact path="/register" component={Auth(RegisterPage, false)} />
+          <Route exact path="/login" component={Auth(LoginPage, false)} />
+        </Switch>
+        <Footer />
+      </Suspense>
     </Router>
   );
 }
