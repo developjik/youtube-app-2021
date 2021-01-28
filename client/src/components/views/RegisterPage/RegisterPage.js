@@ -3,7 +3,24 @@ import { withRouter } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { registerUser } from "../../../_actions/user_action";
 
+import { Form, Input, Button, Checkbox } from "antd";
+
 function RegisterPage(props) {
+  const layout = {
+    labelCol: {
+      span: 10,
+    },
+    wrapperCol: {
+      span: 20,
+    },
+  };
+  const tailLayout = {
+    wrapperCol: {
+      offset: 10,
+      span: 20,
+    },
+  };
+
   const dispatch = useDispatch();
 
   const [name, setName] = useState("");
@@ -28,7 +45,7 @@ function RegisterPage(props) {
   };
 
   const onSubmitHandler = (event) => {
-    event.preventDefault();
+    // event.preventDefault();
 
     if (password !== confirmPassword) {
       return alert("Password not same");
@@ -41,7 +58,6 @@ function RegisterPage(props) {
     };
 
     dispatch(registerUser(data)).then((response) => {
-      console.log(response);
       if (response.payload.register) {
         props.history.push("/login");
       } else {
@@ -60,25 +76,96 @@ function RegisterPage(props) {
         height: "90vh",
       }}
     >
-      <form
-        style={{ display: "flex", flexDirection: "column" }}
-        onSubmit={onSubmitHandler}
+      <Form
+        {...layout}
+        name="register"
+        initialValues={{
+          remember: true,
+        }}
+        onFinish={onSubmitHandler}
       >
-        <label>Email: </label>
-        <input type="email" value={email} onChange={onEmailHandler} />
-        <label>Name: </label>
-        <input type="text" value={name} onChange={onNameHandler} />
-        <label>Password: </label>
-        <input type="password" value={password} onChange={onPasswordHandler} />
-        <label>Confirm Password: </label>
-        <input
-          type="password"
-          value={confirmPassword}
-          onChange={onConfirmPasswordHandler}
-        />
-        <br />
-        <button>Register</button>
-      </form>
+        <Form.Item
+          label="Name"
+          name="name"
+          rules={[
+            {
+              required: true,
+              message: "Please input your name!",
+            },
+          ]}
+        >
+          <Input
+            id="name"
+            placeholder="Enter your Name"
+            value={name}
+            onChange={onNameHandler}
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Email"
+          name="email"
+          rules={[
+            {
+              required: true,
+              message: "Please input your email!",
+            },
+          ]}
+        >
+          <Input
+            id="email"
+            placeholder="Enter your Email"
+            value={email}
+            onChange={onEmailHandler}
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Password"
+          name="password"
+          rules={[
+            {
+              required: true,
+              message: "Please input your password!",
+            },
+          ]}
+        >
+          <Input.Password
+            id="password"
+            placeholder="Enter your Password"
+            value={password}
+            onChange={onPasswordHandler}
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Confirm Password"
+          name="confirmPassword"
+          rules={[
+            {
+              required: true,
+              message: "Please input your Confirm password!",
+            },
+          ]}
+        >
+          <Input.Password
+            id="confirmPassword"
+            placeholder="Enter your ConfirmPassword"
+            value={confirmPassword}
+            onChange={onConfirmPasswordHandler}
+          />
+        </Form.Item>
+
+        <Form.Item {...tailLayout} name="remember" valuePropName="checked">
+          <Checkbox>Remember me</Checkbox>
+        </Form.Item>
+
+        <Form.Item {...tailLayout}>
+          <Button type="primary" htmlType="submit">
+            Register
+          </Button>
+        </Form.Item>
+      </Form>
     </div>
   );
 }

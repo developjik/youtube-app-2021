@@ -1,7 +1,10 @@
 import React, { useState } from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginUser } from "../../../_actions/user_action";
+
+import { Form, Input, Button, Checkbox } from "antd";
+import { UserOutlined, LockOutlined } from "@ant-design/icons";
 
 function LoginPage(props) {
   const dispatch = useDispatch();
@@ -18,7 +21,7 @@ function LoginPage(props) {
   };
 
   const onSubmitHandler = (event) => {
-    event.preventDefault();
+    // event.preventDefault();
 
     let data = {
       email,
@@ -44,17 +47,67 @@ function LoginPage(props) {
         height: "90vh",
       }}
     >
-      <form
-        style={{ display: "flex", flexDirection: "column" }}
-        onSubmit={onSubmitHandler}
+      <Form
+        name="normal_login"
+        className="login-form"
+        initialValues={{
+          remember: true,
+        }}
+        onFinish={onSubmitHandler}
       >
-        <label>Email: </label>
-        <input type="email" value={email} onChange={onEmailHandler} />
-        <label>Password: </label>
-        <input type="password" value={password} onChange={onPasswordHandler} />
-        <br />
-        <button>Login</button>
-      </form>
+        <Form.Item
+          name="email"
+          rules={[
+            {
+              required: true,
+              message: "Please input your name!",
+            },
+          ]}
+        >
+          <Input
+            prefix={<UserOutlined className="site-form-item-icon" />}
+            value={email}
+            onChange={onEmailHandler}
+            placeholder="Email"
+          />
+        </Form.Item>
+        <Form.Item
+          name="password"
+          rules={[
+            {
+              required: true,
+              message: "Please input your Password!",
+            },
+          ]}
+        >
+          <Input
+            prefix={<LockOutlined className="site-form-item-icon" />}
+            type="password"
+            value={password}
+            onChange={onPasswordHandler}
+            placeholder="Password"
+          />
+        </Form.Item>
+        <Form.Item>
+          <Form.Item name="remember" valuePropName="checked" noStyle>
+            <Checkbox>Remember me</Checkbox>
+          </Form.Item>
+          <Link to="./register" className="login-form-forgot">
+            Forgot password
+          </Link>
+        </Form.Item>
+
+        <Form.Item style={{float: 'right'}}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="login-form-button"
+          >
+            Log in
+          </Button>{" "}
+          Or {" "}<Link to="/register">register now!</Link>
+        </Form.Item>
+      </Form>
     </div>
   );
 }
