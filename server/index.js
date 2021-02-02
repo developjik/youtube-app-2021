@@ -27,11 +27,41 @@ app.use(bodyParser.json());
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
+// thumbnails static folder
+app.use(express.static(__dirname + "/uploads/"));
+app.use(express.static(__dirname + "/uploads/thumbnails"));
+
+// multer
+const multer = require("multer");
+
+let storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./server/uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    // only mp4 format ok
+    if (ext !== ".mp4") {
+      return cb(res.status(400).end("now allowed file"), false);
+    }
+    cb(null, true);
+  },
+});
+
+const upload = multer({ storage: storage }).single("file");
+
+// ffmpeg
+const ffmpeg = require("fluent-ffmpeg");
+
 // auth
 const { auth } = require("./middleware/auth");
 
-// User model
+// User model + Video Model
 const { User } = require("./models/User");
+const { Video } = require("./models/Video");
 
 //route
 app.get("/", (req, res) => {
@@ -100,6 +130,79 @@ app.get("/api/users/auth", auth, (req, res) => {
     role: req.user.role,
     image: req.user.image,
   });
+});
+
+// Video Upload Router
+app.post("/api/video/uploadfiles", (req, res) => {
+  upload(req, res, (err) => {
+    if (err) {
+      return res.json({ success: false, err });
+    }
+    return res.json({
+      success: true,
+      url: res.req.file.path,
+      fileName: res.req.file.filename,
+    });
+  });
+});
+
+//Thumbnail Create Router
+app.post("/api/video/thumbnail", (req, res) => {
+  let fileDuration = "";
+  let filePath = "";
+
+  ffmpeg.ffprobe(req.body.url, function (err, metadata) {
+    fileDuration = metadata.format.duration;
+  });
+
+  ffmpeg(req.body.url)
+    .on("filenames", function (filenames) {
+      filePath = filenames[0];
+    })
+    .on("end", function () {
+      return res.json({
+        success: true,
+        url: filePath,
+        fileDuration: fileDuration,
+      });
+    })
+    .on("error", function (err) {
+      return res.json({ success: false, err });
+    })
+    .screenshot({
+      count: 3,
+      folder: "./server/uploads/thumbnails",
+      size: "320x240",
+      filename: "thumbnail-%b.png",
+    });
+});
+
+app.post("/api/video/uploadVideo", (req, res) => {
+  const video = new Video(req.body);
+  video.save((err, doc) => {
+    if (err) return res.json({ success: false, err });
+    res.status(200).json({ success: true });
+  });
+});
+
+app.post("/api/video/getVideoDetail", (req, res) => {
+  // populate를 해줘야지 writer의 정보를 얻어오기 가능, populate X 할 경우 writer의 id만 가져온다
+  Video.find({ _id: req.body.videoId })
+    .populate("writer")
+    .exec((err, video) => {
+      if (err) return res.status(400).send(err);
+      res.status(200).json({ success: true, video });
+    });
+});
+
+app.get("/api/video/getVideos", (req, res) => {
+  // populate를 해줘야지 writer의 정보를 얻어오기 가능, populate X 할 경우 writer의 id만 가져온다
+  Video.find()
+    .populate("writer")
+    .exec((err, videos) => {
+      if (err) return res.status(400).send(err);
+      res.status(200).json({ success: true, videos });
+    });
 });
 
 app.listen(port, () => {

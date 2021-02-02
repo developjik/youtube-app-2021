@@ -1,5 +1,5 @@
 {
-  "name": "boiler_plate",
+  "name": "youtube",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -17,8 +17,10 @@
     "concurrently": "^5.3.0",
     "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
+    "fluent-ffmpeg": "^2.1.2",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.11.12"
+    "mongoose": "^5.11.12",
+    "multer": "^1.4.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.7"

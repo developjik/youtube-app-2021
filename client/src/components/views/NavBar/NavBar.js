@@ -11,6 +11,7 @@ import {
   LogoutOutlined,
   PlusOutlined,
   UserOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 
 function NavBar(props) {
@@ -33,6 +34,7 @@ function NavBar(props) {
         to="/"
         style={{
           float: "left",
+          color: "red",
           width: "10vw",
           display: "flex",
           justifyContent: "center",
@@ -40,7 +42,7 @@ function NavBar(props) {
           fontSize: "2rem",
         }}
       >
-        Logo
+        YOUTUBE
       </Link>
       {redux === null || !redux.userData.isAuth ? (
         <Menu mode="horizontal">
@@ -66,7 +68,7 @@ function NavBar(props) {
         <Menu mode="horizontal">
           <Menu.Item key="Home" icon={<HomeOutlined />}>
             <Link to="/">Home</Link>
-          </Menu.Item>          
+          </Menu.Item>
           <Menu.Item
             key="logout"
             icon={<LogoutOutlined />}
@@ -74,6 +76,13 @@ function NavBar(props) {
             style={{ float: "right" }}
           >
             Logout
+          </Menu.Item>
+          <Menu.Item
+            key="Upload"
+            icon={<UploadOutlined />}
+            style={{ float: "right" }}
+          >
+            <Link to="/video/upload">Upload</Link>
           </Menu.Item>
           <Menu.Item
             key="user"
