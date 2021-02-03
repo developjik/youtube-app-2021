@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { withRouter } from "react-router-dom";
 
-import SideVideo from "./Sections/SideVideo"
+import SideVideo from "./Sections/SideVideo";
+import Subscribe from "./Sections/Subscribe";
 
 import axios from "axios";
 
@@ -18,8 +19,8 @@ function VideoDetailPage(props) {
       })
       .then((response) => {
         if (response.data.success) {
-            console.log(response.data.video)
           setVideo(response.data.video);
+          console.log(response.data.video)
         } else {
           alert("Video Fetch Fail");
         }
@@ -37,7 +38,7 @@ function VideoDetailPage(props) {
             autoPlay
           />
 
-          <List.Item actions>
+        {video[0] !== undefined  && <List.Item actions={[<Subscribe userTo={video[0].writer._id}/>]}>
             <List.Item.Meta
               avatar={
                 video[0]?.writer.image ? (
@@ -46,14 +47,14 @@ function VideoDetailPage(props) {
                   <Avatar icon={<UserOutlined />} />
                 )
               }
-              title={video[0]?.title}
-              description={video[0]?.description}
+              title={video[0].title}
+              description={video[0].description}
             />
-          </List.Item>
+          </List.Item>}
         </div>
       </Col>
       <Col lg={6} xs={24}>
-        <SideVideo/>
+        <SideVideo />
       </Col>
     </Row>
   );

@@ -59,9 +59,10 @@ const ffmpeg = require("fluent-ffmpeg");
 // auth
 const { auth } = require("./middleware/auth");
 
-// User model + Video Model
+// User Model + Video Model + Subscriber Model
 const { User } = require("./models/User");
 const { Video } = require("./models/Video");
+const { Subscriber } = require("./models/Subscriber");
 
 //route
 app.get("/", (req, res) => {
@@ -203,6 +204,72 @@ app.get("/api/video/getVideos", (req, res) => {
       if (err) return res.status(400).send(err);
       res.status(200).json({ success: true, videos });
     });
+});
+
+app.post("/api/video/getSubscriptionVideos", (req, res) => {
+  let subscribedUser = [];
+
+  // 구독 중인 업로더 찾기
+  Subscriber.find({ userFrom: req.body.userFrom }).exec(
+    (err, subscribeInfo) => {
+      if (err) return res.status(400).send(err);
+
+      subscribeInfo.map((subscriber, i) => {
+        subscribedUser.push(subscriber.userTo);
+      });
+
+      // 업로더 정보 통해 동영상 찾기
+      Video.find({ writer: { $in: subscribedUser } })
+        .populate("writer")
+        .exec((err, videos) => {
+          if (err) return res.status(400).send(err);
+          return res.status(200).json({ success: true, videos });
+        });
+    }
+  );
+});
+
+// Subscribe route
+app.post("/api/subscribe/subscribeNumber", (req, res) => {
+  Subscriber.find({ userTo: req.body.userTo }).exec((err, subscribe) => {
+    if (err) return res.status(400).send(err);
+    return res
+      .status(200)
+      .json({ success: true, subscribeNumber: subscribe.length });
+  });
+});
+
+app.post("/api/subscribe/subscribed", (req, res) => {
+  Subscriber.find({
+    userTo: req.body.userTo,
+    userFrom: req.body.userFrom,
+  }).exec((err, subscribe) => {
+    if (err) return res.status(400).send(err);
+    if (subscribe.length !== 0) {
+      return res.status(200).json({ success: true, subscribed: true });
+    } else {
+      return res.status(200).json({ success: true, subscribed: false });
+    }
+  });
+});
+
+app.post("/api/subscribe/unSubscribe", (req, res) => {
+  Subscriber.findOneAndDelete({
+    userTo: req.body.userTo,
+    userFrom: req.body.userFrom,
+  }).exec((err, doc) => {
+    if (err) return res.status(400).send(err);
+    return res.status(200).json({ success: true, doc });
+  });
+});
+
+app.post("/api/subscribe/subscribe", (req, res) => {
+  const subscribe = new Subscriber(req.body);
+
+  subscribe.save((err, subscribe) => {
+    if (err) return res.status(400).send(err);
+    return res.status(200).json({ success: true });
+  });
 });
 
 app.listen(port, () => {

@@ -12,14 +12,14 @@ import {
   PlusOutlined,
   UserOutlined,
   UploadOutlined,
+  InfoCircleOutlined,
 } from "@ant-design/icons";
 
 function NavBar(props) {
   const redux = useSelector((state) => state.user);
-  // console.log(redux)
 
   const onLogoutHandler = () => {
-    axios.get("api/users/logout").then((response) => {
+    axios.get("/api/users/logout").then((response) => {
       if (response.data.logout) {
         props.history.push("/login");
       } else {
@@ -83,6 +83,13 @@ function NavBar(props) {
             style={{ float: "right" }}
           >
             <Link to="/video/upload">Upload</Link>
+          </Menu.Item>
+          <Menu.Item
+            key="Subscription"
+            icon={<InfoCircleOutlined />}
+            style={{ float: "right" }}
+          >
+            <Link to="/subscription">Subscription</Link>
           </Menu.Item>
           <Menu.Item
             key="user"
