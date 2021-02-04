@@ -59,10 +59,11 @@ const ffmpeg = require("fluent-ffmpeg");
 // auth
 const { auth } = require("./middleware/auth");
 
-// User Model + Video Model + Subscriber Model
+// User Model + Video Model + Subscriber Model + Comment Model
 const { User } = require("./models/User");
 const { Video } = require("./models/Video");
 const { Subscriber } = require("./models/Subscriber");
+const { Comment } = require("./models/Comment");
 
 //route
 app.get("/", (req, res) => {
@@ -270,6 +271,27 @@ app.post("/api/subscribe/subscribe", (req, res) => {
     if (err) return res.status(400).send(err);
     return res.status(200).json({ success: true });
   });
+});
+
+// Comment route
+app.post("/api/comment/saveComment", (req, res) => {
+  const comment = new Comment(req.body);
+
+  comment.save((err, comment) => {
+    if (err) return res.status(400).json({ success: false, err});
+
+    Comment.find({'_id': comment._id}).populate('writer').exec((err, result) => {
+      if (err) return res.status(400).json({ success: false, err});
+      return res.status(200).json({ success: true, result });
+    })   
+  });
+});
+
+app.post("/api/comment/getComments", (req, res) => {
+  Comment.find({"postId": req.body.videoId}).populate('writer').exec((err, comments) => {
+    if (err) return res.status(400).send(err);
+    return res.status(200).json({ success: true, comments });
+  })   
 });
 
 app.listen(port, () => {

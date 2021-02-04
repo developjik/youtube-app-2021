@@ -30,6 +30,7 @@ function LoginPage(props) {
 
     dispatch(loginUser(data)).then((response) => {
       if (response.payload.loginSuccess) {
+        window.localStorage.setItem("userId", response.payload.userId);
         props.history.push("/");
       } else {
         alert(response.payload.message);
@@ -97,7 +98,7 @@ function LoginPage(props) {
           </Link>
         </Form.Item>
 
-        <Form.Item style={{float: 'right'}}>
+        <Form.Item style={{ float: "right" }}>
           <Button
             type="primary"
             htmlType="submit"
@@ -105,7 +106,7 @@ function LoginPage(props) {
           >
             Log in
           </Button>{" "}
-          Or {" "}<Link to="/register">register now!</Link>
+          Or <Link to="/register">register now!</Link>
         </Form.Item>
       </Form>
     </div>

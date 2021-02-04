@@ -3,6 +3,7 @@ import { withRouter } from "react-router-dom";
 
 import SideVideo from "./Sections/SideVideo";
 import Subscribe from "./Sections/Subscribe";
+import Comment from "./Sections/Comment";
 
 import axios from "axios";
 
@@ -11,6 +12,11 @@ import { UserOutlined } from "@ant-design/icons";
 
 function VideoDetailPage(props) {
   const [video, setVideo] = useState([]);
+  const [comments, setComments] = useState([]);
+
+  const refreshFunction = (newComment) => {
+    setComments(comments.concat(newComment))
+  }
 
   useEffect(() => {
     axios
@@ -20,9 +26,20 @@ function VideoDetailPage(props) {
       .then((response) => {
         if (response.data.success) {
           setVideo(response.data.video);
-          console.log(response.data.video)
         } else {
           alert("Video Fetch Fail");
+        }
+      });
+
+    axios
+      .post("/api/comment/getComments", {
+        videoId: props.match.params.videoId,
+      })
+      .then((response) => {
+        if (response.data.success) {
+          setComments(response.data.comments);
+        } else {
+          alert("Comments Fetch Fail");
         }
       });
   }, []);
@@ -38,19 +55,22 @@ function VideoDetailPage(props) {
             autoPlay
           />
 
-        {video[0] !== undefined  && <List.Item actions={[<Subscribe userTo={video[0].writer._id}/>]}>
-            <List.Item.Meta
-              avatar={
-                video[0]?.writer.image ? (
-                  <Avatar src={video[0].writer.image} />
-                ) : (
-                  <Avatar icon={<UserOutlined />} />
-                )
-              }
-              title={video[0].title}
-              description={video[0].description}
-            />
-          </List.Item>}
+          {video[0] !== undefined && (
+            <List.Item actions={[<Subscribe userTo={video[0].writer._id} />]}>
+              <List.Item.Meta
+                avatar={
+                  video[0]?.writer.image ? (
+                    <Avatar src={video[0].writer.image} />
+                  ) : (
+                    <Avatar icon={<UserOutlined />} />
+                  )
+                }
+                title={video[0].title}
+                description={video[0].description}
+              />
+            </List.Item>
+          )}
+          <Comment commentLists={comments} refreshFunction={refreshFunction}/>
         </div>
       </Col>
       <Col lg={6} xs={24}>

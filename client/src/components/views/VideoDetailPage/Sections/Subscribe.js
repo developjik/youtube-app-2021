@@ -42,7 +42,6 @@ function Subscribe(props) {
   };
 
   useEffect(() => {
-    console.log(props.userTo)
     axios
       .post("/api/subscribe/subscribeNumber", {
         userTo: props.userTo,
@@ -70,16 +69,20 @@ function Subscribe(props) {
   }, []);
 
   return (
-    <Button
-      style={{
-        backgroundColor: `${subscribed ? "#AAAAAA" : "#CC0000"}`,
-        borderRadius: "1rem",
-        color: "white",
-      }}
-      onClick={onSubscribe}
-    >
-      {subscriberNumber} {subscribed ? "Subscribed" : "Subscribe"}
-    </Button>
+    <div>
+      {props.userTo === localStorage.getItem("userId") ? null : (
+        <Button
+          style={{
+            backgroundColor: `${subscribed ? "#AAAAAA" : "#CC0000"}`,
+            borderRadius: "1rem",
+            color: "white",
+          }}
+          onClick={onSubscribe}
+        >
+          {subscriberNumber} {subscribed ? "Subscribed" : "Subscribe"}
+        </Button>
+      )}
+    </div>
   );
 }
 
