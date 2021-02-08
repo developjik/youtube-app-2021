@@ -4,6 +4,7 @@ import { withRouter } from "react-router-dom";
 import SideVideo from "./Sections/SideVideo";
 import Subscribe from "./Sections/Subscribe";
 import Comment from "./Sections/Comment";
+import LikeDislike from "./Sections/LikeDislike";
 
 import axios from "axios";
 
@@ -56,7 +57,7 @@ function VideoDetailPage(props) {
           />
 
           {video[0] !== undefined && (
-            <List.Item actions={[<Subscribe userTo={video[0].writer._id} />]}>
+            <List.Item actions={[<LikeDislike video={video[0]}/>, <Subscribe userTo={video[0].writer._id} />]}>
               <List.Item.Meta
                 avatar={
                   video[0]?.writer.image ? (

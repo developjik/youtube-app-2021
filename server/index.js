@@ -59,11 +59,13 @@ const ffmpeg = require("fluent-ffmpeg");
 // auth
 const { auth } = require("./middleware/auth");
 
-// User Model + Video Model + Subscriber Model + Comment Model
+// User Model + Video Model + Subscriber Model + Comment Model + Like Model + Dislike Model
 const { User } = require("./models/User");
 const { Video } = require("./models/Video");
 const { Subscriber } = require("./models/Subscriber");
 const { Comment } = require("./models/Comment");
+const { Like } = require("./models/Like");
+const { Dislike } = require("./models/Dislike");
 
 //route
 app.get("/", (req, res) => {
@@ -278,20 +280,123 @@ app.post("/api/comment/saveComment", (req, res) => {
   const comment = new Comment(req.body);
 
   comment.save((err, comment) => {
-    if (err) return res.status(400).json({ success: false, err});
+    if (err) return res.status(400).json({ success: false, err });
 
-    Comment.find({'_id': comment._id}).populate('writer').exec((err, result) => {
-      if (err) return res.status(400).json({ success: false, err});
-      return res.status(200).json({ success: true, result });
-    })   
+    Comment.find({ _id: comment._id })
+      .populate("writer")
+      .exec((err, result) => {
+        if (err) return res.status(400).json({ success: false, err });
+        return res.status(200).json({ success: true, result });
+      });
   });
 });
 
 app.post("/api/comment/getComments", (req, res) => {
-  Comment.find({"postId": req.body.videoId}).populate('writer').exec((err, comments) => {
+  Comment.find({ postId: req.body.videoId })
+    .populate("writer")
+    .exec((err, comments) => {
+      if (err) return res.status(400).send(err);
+      return res.status(200).json({ success: true, comments });
+    });
+});
+
+// Like DisLike Route
+app.post("/api/like/getLikes", (req, res) => {
+  let data = {};
+
+  if (req.body.videoId) {
+    data = { videoId: req.body.videoId };
+  } else {
+    data = { commentId: req.body.commentId };
+  }
+  Like.find(data).exec((err, likes) => {
     if (err) return res.status(400).send(err);
-    return res.status(200).json({ success: true, comments });
-  })   
+    return res.status(200).json({ success: true, likes });
+  });
+});
+
+app.post("/api/like/getDislikes", (req, res) => {
+  let data = {};
+
+  if (req.body.videoId) {
+    data = { videoId: req.body.videoId };
+  } else {
+    data = { commentId: req.body.commentId };
+  }
+  Dislike.find(data).exec((err, dislikes) => {
+    if (err) return res.status(400).send(err);
+    return res.status(200).json({ success: true, dislikes });
+  });
+});
+
+app.post("/api/like/upLike", (req, res) => {
+  let data = {};
+
+  if (req.body.videoId) {
+    data = { videoId: req.body.videoId, userId: req.body.userId };
+  } else {
+    data = { commentId: req.body.commentId, userId: req.body.userId };
+  }
+
+  const like = new Like(data);
+  like.save((err, likeResult) => {
+    if (err) return res.status(400).json({ success: false, err });
+
+    Dislike.findOneAndDelete(data).exec((err, dislikeResult) => {
+      if (err) return res.status(400).json({ success: false, err });
+      return res.status(200).json({ success: true });
+    });
+  });
+});
+
+app.post("/api/like/unLike", (req, res) => {
+  let data = {};
+
+  if (req.body.videoId) {
+    data = { videoId: req.body.videoId, userId: req.body.userId };
+  } else {
+    data = { commentId: req.body.commentId, userId: req.body.userId };
+  }
+
+  Like.findOneAndDelete(data).exec((err, result) => {
+    if (err) return res.status(400).json({ success: false, err });
+    return res.status(200).json({ success: true, result });
+  });
+});
+
+app.post("/api/like/upDislike", (req, res) => {
+  let data = {};
+
+  if (req.body.videoId) {
+    data = { videoId: req.body.videoId, userId: req.body.userId };
+  } else {
+    data = { commentId: req.body.commentId, userId: req.body.userId };
+  }
+
+  const dislike = new Dislike(data);
+  dislike.save((err, dislikeResult) => {
+    if (err) return res.status(400).json({ success: false, err });
+
+    Like.findOneAndDelete(data).exec((err, dislikeResult) => {
+      if (err) return res.status(400).json({ success: false, err });
+      return res.status(200).json({ success: true });
+    });
+  });
+});
+
+app.post("/api/like/unDislike", (req, res) => {
+  let data = {};
+
+  if (req.body.videoId) {
+    data = { videoId: req.body.videoId, userId: req.body.userId };
+  } else {
+    data = { commentId: req.body.commentId, userId: req.body.userId };
+  }
+
+  Dislike.findOneAndDelete(data).exec((err, result) => {
+    if (err) return res.status(400).json({ success: false, err });
+    return res.status(200).json({ success: true, result });
+  });
 });
 
 app.listen(port, () => {

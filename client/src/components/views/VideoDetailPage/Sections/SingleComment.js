@@ -3,6 +3,8 @@ import { withRouter } from "react-router-dom";
 
 import axios from "axios";
 
+import LikeDislike from "./LikeDislike";
+
 import { Comment, Avatar, Button, Input } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 
@@ -12,7 +14,7 @@ function SingleComment(props) {
   const [openReply, setOpenReply] = useState(false);
   const [commentValue, setCommentValue] = useState("");
 
-  const actions = [
+  const actions = [<LikeDislike commentId={props.comment._id}/>,
     <span
       onClick={() => {
         setOpenReply(!openReply);
@@ -61,7 +63,7 @@ function SingleComment(props) {
       />
 
       {openReply && (
-        <form style={{ display: "flex", marginBottom: "10px" }} onSubmit>
+        <form style={{ display: "flex", marginBottom: "10px" }} onSubmit={onSubmit}>
           <TextArea
             rows={2}
             style={{ width: "100%", borderRadius: "8px" }}
